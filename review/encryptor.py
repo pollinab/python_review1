@@ -31,7 +31,7 @@ decode_parser.add_argument('--input-file', type=argparse.FileType('r'),
                            default=sys.stdin)
 decode_parser.add_argument('--output-file', type=argparse.FileType('w'),
                            default=sys.stdout)
-train_parser.add_argument('--input-file', type=argparse.FileType('r'),
+train_parser.add_argument('--text-file', type=argparse.FileType('r'),
                           default=sys.stdin)
 train_parser.add_argument('--model-file', required=True)
 hack_parser.add_argument('--input-file', type=argparse.FileType('r'),
@@ -55,7 +55,7 @@ elif args.method == 'decode':
     else:
         args.output_file.write(decode_vigenere(args.key, text))
 elif args.method == 'train':
-    text = args.input_file.read()
+    text = args.text_file.read()
     train_function(text, args.model_file)
 elif args.method == 'hack':
     text = args.input_file.read()
