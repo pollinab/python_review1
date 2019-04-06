@@ -3,80 +3,50 @@ from collections import Counter
 import json
 
 
-def encode_caesar(key, input_text):
+def caesar(key, input_text, func_type):
     res = ''
+    if func_type == 'decode':
+        factor = -1
+    else:
+        factor = 1
+    key *= factor
     for symbol in input_text:
         if ord('a') <= ord(symbol) <= ord('z'):
             index = ord(symbol) + key
-            if index > ord('z'):
-                index -= ord('z') - ord('a') + 1
+            if index > ord('z') or index < ord('a'):
+                index -= (ord('z') - ord('a') + 1) * factor
             res += chr(index)
         elif ord('A') <= ord(symbol) <= ord('Z'):
             index = ord(symbol) + key
-            if index > ord('Z'):
-                index -= ord('Z') - ord('A') + 1
+            if index > ord('Z') or index < ord('A'):
+                index -= (ord('Z') - ord('A') + 1) * factor
             res += chr(index)
         else:
             res += symbol
     return res
 
 
-def encode_vigenere(key, input_text):
+def vigenere(key, input_text, func_type):
     res = ''
     length = len(input_text)
     key = key.lower()
+    if func_type == 'encode':
+        factor = 1
+    else:
+        factor = -1
     for i in range(length):
         symbol = input_text[i]
         key_value = ord(key[i % len(key)]) - ord('a')
+        key_value *= factor
         if ord('a') <= ord(symbol) <= ord('z'):
             index = ord(symbol) + key_value
-            if index > ord('z'):
-                index -= ord('z') - ord('a') + 1
+            if index < ord('a') or index > ord('z'):
+                index -= (ord('z') - ord('a') + 1) * factor
             res += chr(index)
         elif ord('A') <= ord(symbol) <= ord('Z'):
             index = ord(symbol) + key_value
-            if index > ord('Z'):
-                index -= ord('Z') - ord('A') + 1
-            res += chr(index)
-        else:
-            res += symbol
-    return res
-
-
-def decode_caesar(key, input_text):
-    res = ''
-    for symbol in input_text:
-        if ord('a') <= ord(symbol) <= ord('z'):
-            index = ord(symbol) - key
-            if index < ord('a'):
-                index += ord('z') - ord('a') + 1
-            res += chr(index)
-        elif ord('A') <= ord(symbol) <= ord('Z'):
-            index = ord(symbol) - key
-            if index < ord('A'):
-                index += ord('Z') - ord('A') + 1
-            res += chr(index)
-        else:
-            res += symbol
-    return res
-
-
-def decode_vigenere(key, input_text):
-    res = ''
-    length = len(input_text)
-    key = key.lower()
-    for i in range(length):
-        symbol = input_text[i]
-        key_value = ord(key[i % len(key)]) - ord('a')
-        if ord('a') <= ord(symbol) <= ord('z'):
-            index = ord(symbol) - key_value
-            if index < ord('a'):
-                index += ord('z') - ord('a') + 1
-            res += chr(index)
-        elif ord('A') <= ord(symbol) <= ord('Z'):
-            index = ord(symbol) - key_value
-            if index < ord('A'):
-                index += ord('Z') - ord('A') + 1
+            if index < ord('A') or index > ord('Z'):
+                index -= (ord('Z') - ord('A') + 1) * factor
             res += chr(index)
         else:
             res += symbol
@@ -84,10 +54,11 @@ def decode_vigenere(key, input_text):
 
 
 def train_function(text, file):
-    text = text.lower()
-    text = ''.join(s for s in text if s in string.ascii_lowercase)
-    frequency = dict(Counter(text))
-    length = len(text)
+    frequency = Counter([s.lower() for s in text
+                         if s in string.ascii_letters])
+    length = 0
+    for key in frequency:
+        length += frequency[key]
     for key in frequency:
         frequency[key] /= length
     for s in string.ascii_lowercase:
@@ -100,13 +71,13 @@ def train_function(text, file):
 def hack_function(input_text, model_file):
     with open(model_file, "r") as read_file:
         normal_frequency = json.load(read_file)
-    text0 = input_text.lower()
-    text0 = ''.join(s for s in text0 if s in string.ascii_lowercase)
-    min_deflection = -1
+    text0 = ''.join(s.lower() for s in input_text
+                    if s in string.ascii_letters)
+    min_deflection = float("inf")
     min_key = 0
     for key in range(26):
-        text = decode_caesar(key, text0)
-        frequency = dict(Counter(text))
+        text = caesar(key, text0, 'decode')
+        frequency = Counter(text)
         length = len(text)
         for i in frequency:
             frequency[i] /= length
@@ -115,7 +86,7 @@ def hack_function(input_text, model_file):
             if frequency.get(s) is None:
                 frequency[s] = 0
             deflection += (frequency[s] - normal_frequency[s])**2
-        if min_deflection == -1 or deflection < min_deflection:
+        if deflection < min_deflection:
             min_deflection = deflection
             min_key = key
-    return decode_caesar(min_key, input_text)
+    return caesar(min_key, input_text, 'decode')
