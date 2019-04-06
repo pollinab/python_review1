@@ -1,5 +1,5 @@
-from definition import decode_caesar, decode_vigenere, hack_function
-from definition import encode_vigenere, encode_caesar, train_function
+from definition import caesar, vigenere, hack_function
+from definition import train_function
 import argparse
 import sys
 
@@ -45,15 +45,15 @@ args = parser.parse_args()
 if args.method == 'encode':
     text = args.input_file.read()
     if args.cipher == 'caesar':
-        args.output_file.write(encode_caesar(int(args.key), text))
+        args.output_file.write(caesar(int(args.key), text, 'encode'))
     else:
-        args.output_file.write(encode_vigenere(args.key, text))
+        args.output_file.write(vigenere(args.key, text, 'encode'))
 elif args.method == 'decode':
     text = args.input_file.read()
     if args.cipher == 'caesar':
-        args.output_file.write(decode_caesar(int(args.key), text))
+        args.output_file.write(caesar(int(args.key), text, 'decode'))
     else:
-        args.output_file.write(decode_vigenere(args.key, text))
+        args.output_file.write(vigenere(args.key, text, 'decode'))
 elif args.method == 'train':
     text = args.text_file.read()
     train_function(text, args.model_file)
