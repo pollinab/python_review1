@@ -1,5 +1,5 @@
-from definition import caesar, vigenere, hack_function
-from definition import train_function
+from definition import caesar, vigenere, hack
+from definition import train
 import argparse
 import sys
 
@@ -56,7 +56,7 @@ elif args.method == 'decode':
         args.output_file.write(vigenere(args.key, text, 'decode'))
 elif args.method == 'train':
     text = args.text_file.read()
-    train_function(text, args.model_file)
+    train(text, args.model_file)
 elif args.method == 'hack':
     text = args.input_file.read()
-    args.output_file.write(hack_function(text, args.model_file))
+    args.output_file.write(hack(text, args.model_file))
